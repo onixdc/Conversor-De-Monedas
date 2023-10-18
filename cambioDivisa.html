@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Cambio de divisa</title>
+</head>
+<body>
+    <img src="Foto.png" alt="" class="conversor-icono">
+    <h1>Conversión</h1>
+    
+    <form id="frmConversion">
+        <label>Conversión</label><br/>
+        
+        <select id="selectFrom" onchange="convertir()">
+            <option value="" disabled selected>Selecciona moneda de origen</option>
+        </select>
+        
+        <input type="number" id="inpImporte"/>
+        
+        <span>a</span>
+        
+        <select id="selectTo" onchange="convertir()">
+            <option value="" disabled selected>Selecciona moneda de destino</option>
+        </select>
+        
+        <input type="number" id="inpResult" readonly/>
+        
+        <button type="button" onclick="convertir()">Convertir</button>
+    </form>
+
+    <script>
+        function convertir() {
+            const host = 'api.frankfurter.app';
+            let importe = document.querySelector("#inpImporte");
+            let fromCurrency = document.querySelector("#selectFrom").value;
+            let toCurrency = document.querySelector("#selectTo").value;
+
+            fetch(`https://${host}/latest?from=${fromCurrency}&to=${toCurrency}`)
+            .then(resp => resp.json())
+            .then((data) => {
+                let inpResultado = document.querySelector("#inpResult");
+                inpResultado.value = (parseFloat(importe.value) * data.rates[toCurrency]).toFixed(2);
+                console.log(data);
+            });
+        }
+
+        
+        cargarMonedas();
+
+        function cargarMonedas() {
+            const host = 'api.frankfurter.app';
+
+            fetch(`https://${host}/currencies`)
+            .then(resp => resp.json())
+            .then((data) => {
+                let selectFrom = document.querySelector("#selectFrom");
+                let selectTo = document.querySelector("#selectTo");
+
+                
+                selectFrom.innerHTML = '<option value="" disabled selected>Selecciona moneda de origen</option>';
+                selectTo.innerHTML = '<option value="" disabled selected>Selecciona moneda de destino</option>';
+
+                
+                Object.keys(data).forEach(key => {
+                    let optionFrom = document.createElement("option");
+                    optionFrom.value = key;
+                    optionFrom.text = `${data[key]} - [${key}]`;
+                    selectFrom.add(optionFrom);
+                    
+                    let optionTo = document.createElement("option");
+                    optionTo.value = key;
+                    optionTo.text = `${data[key]} - [${key}]`;
+                    selectTo.add(optionTo);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
